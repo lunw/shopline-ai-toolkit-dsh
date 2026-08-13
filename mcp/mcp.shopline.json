@@ -1,0 +1,41 @@
+{
+  "//": "SHOPLINE AI Toolkit DSH — ready-to-use MCP client configurations.",
+  "//2": "1) For Cursor / Claude Desktop / Cline: copy the mcpServers block into your MCP config file.",
+  "//3": "2) For DSH: the bundle install does this automatically; manual patch snippet below.",
+  "mcpServers": {
+    "shopline": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@shoplineos/shopline-developer-mcp"
+      ]
+    },
+    "shopline-sline": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@shopline/dev-mcp@latest"
+      ],
+      "env": {
+        "SLINE": "true",
+        "OPT_OUT_INSTRUMENTATION": "true"
+      }
+    }
+  },
+  "dshPatchSnippet": [
+    {
+      "id": "mcp-shopline",
+      "name": "@deepseek-ai/dsh-mcp-client",
+      "config": {
+        "serverName": "shopline",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@shoplineos/shopline-developer-mcp"
+        ],
+        "toolCallTimeoutMs": 120000
+      }
+    }
+  ]
+}
