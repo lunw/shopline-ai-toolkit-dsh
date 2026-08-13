@@ -1,6 +1,6 @@
 {
   "name": "shopline-ai-toolkit-dsh",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SHOPLINE AI Toolkit for DeepSeek Harness (DSH): bridges the official SHOPLINE Developer MCP server and ships SHOPLINE agent skills, mirroring the Shopify AI Toolkit architecture. dsh-plugin.",
   "type": "module",
   "main": "lib/index.js",
