@@ -1,0 +1,50 @@
+# shopline-ai-toolkit-dsh bundle patch
+#
+# Applies on top of a dsh profile root (empty entry list) after the base
+# bundle layers. Two contributions:
+#
+# 1. mcp-shopline — bridges the OFFICIAL SHOPLINE Developer MCP server
+#    (@shoplineos/shopline-developer-mcp, stdio, local, no auth required)
+#    through DSH's native MCP client. Every MCP tool becomes a native model
+#    tool named mcp__shopline__<tool>, e.g.:
+#      mcp__shopline__search_shopline_docs
+#      mcp__shopline__get_admin_rest_endpoint_detail
+#      mcp__shopline__get_graphql_schema
+#      mcp__shopline__validate_graphql_codes
+#    Docs: https://developer.shopline.com/docs/apps/development-tool/shopline-developer-mcp
+#
+# 2. shopline-toolkit — this package's Cordis plugin (lib/index.js), which
+#    registers the bundled SKILL.md skills (skills/*) on ctx.skills so the
+#    agent's skill catalog includes SHOPLINE onboarding, Admin REST, GraphQL,
+#    OAuth signing, Webhook, Sline, and Dev MCP usage guidance.
+#
+# Optional: uncomment to also bridge the community sline.dev MCP server
+# (@shopline/dev-mcp) with Sline template-engine support enabled. Its tools
+# appear as mcp__sline__* (learn_shopline_api, search_docs_chunks,
+# fetch_full_docs, introspect_admin_schema, validate_theme).
+
+- insert:
+    - id: mcp-shopline
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: shopline
+        transport: stdio
+        command: npx
+        args: ['-y', '@shoplineos/shopline-developer-mcp']
+        toolCallTimeoutMs: 120000
+
+    # Optional community MCP server (uncomment to enable):
+    # - id: mcp-shopline-sline
+    #   name: '@deepseek-ai/dsh-mcp-client'
+    #   config:
+    #     serverName: sline
+    #     transport: stdio
+    #     command: npx
+    #     args: ['-y', '@shopline/dev-mcp@latest']
+    #     env:
+    #       SLINE: 'true'
+    #       OPT_OUT_INSTRUMENTATION: 'true'
+    #     toolCallTimeoutMs: 120000
+
+    - id: shopline-toolkit
+      name: 'shopline-ai-toolkit-dsh'

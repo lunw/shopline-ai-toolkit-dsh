@@ -1,0 +1,61 @@
+{
+  "name": "shopline-ai-toolkit-dsh",
+  "version": "0.1.0",
+  "description": "SHOPLINE AI Toolkit for DeepSeek Harness (DSH): bridges the official SHOPLINE Developer MCP server and ships SHOPLINE agent skills, mirroring the Shopify AI Toolkit architecture. dsh-plugin.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "skills",
+    "mcp",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "docs",
+    "examples"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-mcp-client": "^0.1.0-rc.6"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-skill": "^0.1.0-rc.6"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "shopline",
+    "ai-toolkit",
+    "mcp",
+    "model-context-protocol",
+    "ecommerce",
+    "openapi",
+    "graphql",
+    "sline"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lunw/shopline-ai-toolkit-dsh.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lunw/shopline-ai-toolkit-dsh/issues"
+  },
+  "homepage": "https://github.com/lunw/shopline-ai-toolkit-dsh",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
