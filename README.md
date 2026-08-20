@@ -20,7 +20,7 @@ architecture to SHOPLINE developers working inside **DeepSeek Harness (dsh)**:
 
 | Layer | What you get |
 | --- | --- |
-| 🧠 **Agent skills** (`skills/`) | 7 SKILL.md bundles: `shopline-onboarding-dev`, `shopline-admin-rest`, `shopline-graphql`, `shopline-oauth`, `shopline-webhook`, `shopline-sline`, `shopline-dev-mcp` — endpoint URLs, signing rules, error codes, retry policies, all grounded in [developer.shopline.com](https://developer.shopline.com/) docs and [community experience](https://community.shoplineapp.cn/) |
+| 🧠 **Agent skills** (`skills/`) | 8 SKILL.md bundles: `shopline-onboarding-dev`, `shopline-admin-rest`, `shopline-graphql`, `shopline-oauth`, `shopline-webhook`, `shopline-sline`, `shopline-dev-mcp` (documented behavior) + `shopline-app-dev-doc-gaps` (app-dev doc-gap supplement, withdrawable once official docs cover it) — endpoint URLs, signing rules, error codes, retry policies, all grounded in [developer.shopline.com](https://developer.shopline.com/) docs and [community experience](https://community.shoplineapp.cn/) |
 | 🔌 **Dev MCP bridge** | The **official** [SHOPLINE Developer MCP](https://developer.shopline.com/docs/apps/development-tool/shopline-developer-mcp) (`@shoplineos/shopline-developer-mcp`, local stdio, no auth) is wired through dsh's native MCP client — tools appear as `mcp__shopline__search_shopline_docs`, `mcp__shopline__get_admin_rest_endpoint_detail`, `mcp__shopline__get_graphql_schema`, `mcp__shopline__validate_graphql_codes`, … |
 | 🎛️ **Optional community MCP** | [sline.dev](https://sline.dev/mcp) server (`@shopline/dev-mcp`) adds `mcp__sline__introspect_admin_schema`, `mcp__sline__validate_theme`, … (commented out by default) |
 | 📦 **dsh bundle** | `cordis.patch.yml` + `lib/index.js`, installable with `dsh plugin --profile <name> add shopline-ai-toolkit-dsh` |
@@ -53,7 +53,7 @@ More prompts: [examples/prompts.md](examples/prompts.md) · Design: [docs/archit
 ├── package.json          # dsh bundle manifest (dsh.bundle.patch)
 ├── cordis.patch.yml      # bundle patch: mcp-shopline bridge + shopline-toolkit plugin
 ├── lib/index.js          # Cordis plugin: registers skills/* on ctx.skills
-├── skills/               # 7 SHOPLINE agent skills (SKILL.md bundles)
+├── skills/               # 8 SHOPLINE agent skills (SKILL.md bundles; app-dev-doc-gaps is withdrawable)
 ├── mcp/mcp.shopline.json # ready-to-use MCP client configs (Cursor/Claude/DSH)
 ├── docs/                 # architecture.md · install.md
 └── examples/prompts.md   # copy-paste prompts (EN/中文)
@@ -75,7 +75,7 @@ MIT. Not affiliated with SHOPLINE; official docs and npm packages remain the sou
 
 | 层 | 内容 |
 | --- | --- |
-| 🧠 **Agent 技能**（`skills/`） | 7 个 SKILL.md 技能：`shopline-onboarding-dev`（入门）、`shopline-admin-rest`（REST API）、`shopline-graphql`（GraphQL）、`shopline-oauth`（授权与签名）、`shopline-webhook`、`shopline-sline`（模板引擎）、`shopline-dev-mcp`（MCP 工具用法）。端点、签名规则、错误码、重试策略均来自 [developer.shopline.com](https://developer.shopline.com/) 官方文档与 [community.shoplineapp.cn](https://community.shoplineapp.cn/) 社区实践 |
+| 🧠 **Agent 技能**（`skills/`） | 8 个 SKILL.md 技能：`shopline-onboarding-dev`（入门）、`shopline-admin-rest`（REST API）、`shopline-graphql`（GraphQL）、`shopline-oauth`（授权与签名）、`shopline-webhook`、`shopline-sline`（模板引擎）、`shopline-dev-mcp`（MCP 工具用法，均为官方已文档化行为）+ `shopline-app-dev-doc-gaps`（应用开发文档盲区补充，官方文档补齐后逐条撤回）。端点、签名规则、错误码、重试策略均来自 [developer.shopline.com](https://developer.shopline.com/) 官方文档与 [community.shoplineapp.cn](https://community.shoplineapp.cn/) 社区实践 |
 | 🔌 **Dev MCP 桥接** | 通过 dsh 原生 MCP 客户端接入**官方** [SHOPLINE 开发者 MCP](https://developer.shopline.com/docs/apps/development-tool/shopline-developer-mcp)（`@shoplineos/shopline-developer-mcp`，本地 stdio、免鉴权）。工具以 `mcp__shopline__search_shopline_docs`、`mcp__shopline__get_admin_rest_endpoint_detail`、`mcp__shopline__get_graphql_schema`、`mcp__shopline__validate_graphql_codes` 等形式直接可用 |
 | 🎛️ **可选社区 MCP** | [sline.dev](https://sline.dev/mcp) 服务器（`@shopline/dev-mcp`）提供 `mcp__sline__introspect_admin_schema`（Admin GraphQL Schema 内省）、`mcp__sline__validate_theme`（Sline 模板校验）等，默认注释、按需开启 |
 | 📦 **dsh 插件包** | `cordis.patch.yml` + `lib/index.js`，一条命令安装：`dsh plugin --profile <name> add shopline-ai-toolkit-dsh` |
@@ -108,7 +108,7 @@ dsh web
 ├── package.json          # dsh bundle 清单（dsh.bundle.patch）
 ├── cordis.patch.yml      # bundle patch：mcp-shopline 桥接 + shopline-toolkit 插件
 ├── lib/index.js          # Cordis 插件：把 skills/* 注册到 ctx.skills
-├── skills/               # 7 个 SHOPLINE 技能（SKILL.md 包）
+├── skills/               # 8 个 SHOPLINE 技能（SKILL.md 包；app-dev-doc-gaps 可撤回）
 ├── mcp/mcp.shopline.json # 开箱即用的 MCP 客户端配置（Cursor/Claude/DSH）
 ├── docs/                 # architecture.md · install.md
 └── examples/prompts.md   # 可直接复制的提示词（中/英）

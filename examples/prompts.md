@@ -37,3 +37,12 @@ Once the plugin is installed, try these (中英文均可):
 
 - "I'm migrating a Shopify app to SHOPLINE. Map my Shopify REST endpoints to SHOPLINE Admin REST equivalents and highlight the auth differences."
 - "从 Shopify 迁移到 SHOPLINE：对比两边的 Webhook 与 GraphQL 全局 ID 机制。"
+
+## 文档盲区排错（shopline-app-dev-doc-gaps 技能场景）
+
+- 「我跑 `shopline app dev` 崩了，报 `Cannot read properties of undefined (reading 'dev')`，怎么排查？」——检查双进程配置（backend + frontend 反向代理）
+- 「CLI 每次重启后，店铺前台加载 /sdk/orbit.js 报 ERR_NAME_NOT_RESOLVED，SDK 不生效。」——script tag 仍指向死隧道，需要重新授权或 Enable / re-inject
+- 「我申请了 read_themes 权限，但 GET /themes.json 还是报权限错误，为什么？」——该端点需要 read_content 权限点
+- 「OAuth 授权完成后页面空白，回调没生效。」——回调可能经 Admin 代理进入（proxyDomain），嵌入上下文必须回 JSON 而不是 302
+- 「App Bridge 集成后 window.shopline 是 undefined，怎么接线？」——UMD 构建 dist/next.umd.js + init(appKey) 后才有全局对象
+- 「本地 CLI 开发时后端应该监听哪个端口？」——读 BACKEND_PORT（隧道目标），PORT 是前端端口

@@ -80,3 +80,34 @@ toolkit's shape:
   for signature-based verification patterns.
 - Store-scoped data access always goes through merchant-authorized tokens (OAuth scopes
   `read_*` / `write_*`); the agent should confirm scope before destructive calls.
+
+## 实战沉淀：应用开发文档盲区补充技能（shopline-app-dev-doc-gaps）
+
+v0.2.0 adds one deliberately different skill: **`shopline-app-dev-doc-gaps`** — a *supplement
+to the official SHOPLINE documentation for APP DEVELOPMENT*, distilled from real project
+debugging (Orbit PWA, a DTC PWA Enabler SHOPLINE app, verified 2026-08-20).
+
+**Why one skill instead of many**: these entries are a *delta over the official docs* that
+SHOPLINE may fix at any time. Keeping them in a single, clearly-labeled skill with a coverage
+table makes withdrawal mechanical: when official docs cover an entry, delete the entry, flip
+its table row to `fixed → withdrawn`, and update the README "Doc gap status" — the rest of
+the toolkit (the 7 documented-behavior skills) stays untouched. This mirrors a patch layer
+that can be dropped once upstream merges the fix.
+
+**Scope — app development only (in/out boundary, mirrored in the SKILL.md itself):**
+
+| ✅ In scope (app development) | ❌ Out of scope |
+| --- | --- |
+| SHOPLINE CLI local development contract (process configs, env semantics, install probe, injected assets) | Theme development (Sline/Liquid templates, theme structure) |
+| OAuth callback & install contract (callback path, admin-proxy callback, per-visit install params, handle resolution) | Storefront pure-frontend issues (SDK internals, cache strategies) |
+| Embedded admin integration (context routing, session handle, App Bridge wiring & auth protocol) | The SHOPLINE Developer MCP tools themselves |
+| App permission point mapping (OpenAPI scope → endpoint requirements) | Generic web knowledge (cookies, CORS, HTTPS, layout) |
+
+**Selection criteria** — an entry qualifies only if: (1) the behavior is **not documented (or
+documented incorrectly)** on developer.shopline.com; (2) it was **verified in a real project**
+and cost measurable debugging time; (3) it is **platform-level and app-dev-related** — never
+project-internal conventions or generic web knowledge. When in doubt, exclude.
+
+Coverage today (11 entries, all app-dev): CLI local development contract (A1–A4), OAuth
+callback & install contract (B1–B4), permission point mapping (C1), App Bridge knowledge
+gaps (D1–D2). Tracked in the skill's own coverage table with verification dates.
