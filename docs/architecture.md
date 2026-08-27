@@ -85,7 +85,8 @@ toolkit's shape:
 
 v0.2.0 adds one deliberately different skill: **`shopline-app-dev-doc-gaps`** — a *supplement
 to the official SHOPLINE documentation for APP DEVELOPMENT*, distilled from real project
-debugging (Orbit PWA, a DTC PWA Enabler SHOPLINE app, verified 2026-08-20).
+debugging (Orbit PWA, a DTC PWA Enabler SHOPLINE app; verified across three debugging
+rounds 2026-08-20 → 2026-08-22, including production install, billing and hardening).
 
 **Why one skill instead of many**: these entries are a *delta over the official docs* that
 SHOPLINE may fix at any time. Keeping them in a single, clearly-labeled skill with a coverage
@@ -108,6 +109,8 @@ documented incorrectly)** on developer.shopline.com; (2) it was **verified in a 
 and cost measurable debugging time; (3) it is **platform-level and app-dev-related** — never
 project-internal conventions or generic web knowledge. When in doubt, exclude.
 
-Coverage today (11 entries, all app-dev): CLI local development contract (A1–A4), OAuth
-callback & install contract (B1–B4), permission point mapping (C1), App Bridge knowledge
-gaps (D1–D2). Tracked in the skill's own coverage table with verification dates.
+Coverage today (17 entries, all app-dev): CLI local development contract (A1–A4), OAuth
+callback & install contract (B1–B5), embedded session isolation (D3), permission point
+mapping (C1), App Bridge knowledge gaps (D1–D2), billing & subscription webhooks (E1–E3),
+app-store billing config (F1). Tracked in the skill's own coverage table with verification
+dates (2026-08-20 → 2026-08-22).

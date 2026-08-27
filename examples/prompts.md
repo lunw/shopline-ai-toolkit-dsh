@@ -46,3 +46,10 @@ Once the plugin is installed, try these (中英文均可):
 - 「OAuth 授权完成后页面空白，回调没生效。」——回调可能经 Admin 代理进入（proxyDomain），嵌入上下文必须回 JSON 而不是 302
 - 「App Bridge 集成后 window.shopline 是 undefined，怎么接线？」——UMD 构建 dist/next.umd.js + init(appKey) 后才有全局对象
 - 「本地 CLI 开发时后端应该监听哪个端口？」——读 BACKEND_PORT（隧道目标），PORT 是前端端口
+
+## 计费订阅与上架配置（E/F 组场景）
+
+- 「订阅支付成功，但商家后台一直提示试用/未激活，怎么排查？」——检查 appsubscription 事件名（paid / create / expiration，不是 activated/expired）、订阅版本对齐、X-Shopline-Shop-Id 数字 ID 的解析链
+- 「其他 webhook 正常，但计费事件收不到？」——X-Shopline-Shop-Id 是数字店铺 ID 不是 handle，检查 platformShopId/domain 反推与「静默 200 无日志」的吞事件问题；再核对 POST /webhooks.json 的 api_version 与开发者中心一致
+- 「我在开发者中心配了功能点，但新的订阅事件 featureKeyList 还是 ['default']？」——featureKeyList 是订阅时的快照，需改套餐/重新订阅才会带新配置
+- 「应用要上架并走 SHOPLINE 官方订阅，套餐应该怎么配？」——付费模式配置多个版本套餐后：每个套餐版本要关联功能点；还要配置订阅组（订阅组会展示在应用市场的 listing 中）

@@ -1,14 +1,14 @@
 ---
 name: shopline-app-dev-doc-gaps
-description: SHOPLINE APP-DEVELOPMENT documentation gaps — undocumented platform behaviors verified in real app projects (CLI dev contract, OAuth callback & install contract, embedded admin, permission point mapping, App Bridge). Use when the official docs do not explain an app-dev failure or behavior. Withdrawable: once official docs cover an entry, delete it from this skill.
-whenToUse: Local SHOPLINE CLI app development, OAuth callback failures, embedded admin integration, app permission-scope errors, App Bridge wiring — app-development scenarios where developer.shopline.com has no answer.
+description: SHOPLINE APP-DEVELOPMENT documentation gaps — undocumented platform behaviors verified in real app projects (CLI dev contract, OAuth callback & install contract, embedded admin, permission point mapping, App Bridge, billing/subscription webhooks, app-store billing config). Use when the official docs do not explain an app-dev failure or behavior. Withdrawable: once official docs cover an entry, delete it from this skill.
+whenToUse: Local SHOPLINE CLI app development, OAuth callback failures, embedded admin integration, app permission-scope errors, App Bridge wiring, billing/subscription webhook failures, app-store paid-plan config — app-development scenarios where developer.shopline.com has no answer.
 ---
 
 # SHOPLINE App-Dev Doc Gaps（应用开发文档盲区补充）
 
 This skill records SHOPLINE **app-development** platform behaviors that were **not documented
 (or were documented incorrectly) on developer.shopline.com** and cost real debugging time in a
-production-bound app project (Orbit PWA, a DTC PWA Enabler SHOPLINE app, verified 2026-08-20).
+production-bound app project (Orbit PWA, a DTC PWA Enabler SHOPLINE app; verified across three debugging rounds, 2026-08-20 → 2026-08-22, including production install, billing and hardening).
 It is a *supplement to the official docs* for app development only — check the official docs
 first, and **withdraw each entry as soon as the official docs cover it**.
 
@@ -39,7 +39,7 @@ Boundary rules:
   behavior; this one is the removable delta.
 - Track withdrawals in the repo README ("Doc gap status") so reviewers can audit.
 
-## Doc coverage status (updated 2026-08-20)
+## Doc coverage status (updated 2026-08-22)
 
 | # | Gap | Verified | Official docs |
 | --- | --- | --- | --- |
@@ -54,6 +54,12 @@ Boundary rules:
 | C1 | `GET /themes.json` needs the `read_content` permission point, NOT `read_themes` (which only covers theme file/asset endpoints) | 2026-08-20 | gap |
 | D1 | App Bridge browser wiring: UMD build `dist/next.umd.js`, `window.shopline` global, `shared.getSessionToken(app)` | 2026-08-20 | gap |
 | D2 | App Bridge auth protocol: 403 + `X-SHOPLINE-API-Request-Failure-Reauthorize`, exit-iframe bounce, SessionToken = JWT HS256 signed with **Base64(appSecret)** | 2026-08-20 | gap |
+| B5 | OAuth callback MUST answer fast (< 2 s); heavy provisioning must be fire-and-forget; gate install shortcuts on `oauthCompletedAt` | 2026-08-22 | gap |
+| D3 | Cross-store session cookie isolation: embedded iframes for multiple stores share one origin/cookie jar; cookies must be per-store and handle-bound | 2026-08-22 | gap |
+| E1 | Billing webhook event ids: `appsubscription/paid`, `appsubscription/create`, `appsubscription/expiration` (NOT activated/expired); subscriptions are version-scoped | 2026-08-22 | gap |
+| E2 | `X-Shopline-Shop-Id` is a NUMERIC store id, not the handle; resolve via platformShopId / `X-Shopline-Shop-Domain` | 2026-08-22 | gap |
+| E3 | `featureKeyList` is a snapshot taken at subscription time; Developer Center feature-key config does not retroactively update existing subscriptions | 2026-08-22 | gap |
+| F1 | App-store billing config: associate feature points with each paid plan and configure the subscription group (shown in the marketplace listing) | 2026-08-22 | gap |
 
 ## A. CLI local development contract (CLI 本地开发契约)
 
@@ -115,6 +121,13 @@ Boundary rules:
 - **Fix**: resolve the handle server-side from the session (cookie JWT or the App Bridge Bearer token payload) in `/api/auth/status`; the frontend `authorize()` should use the backend-resolved handle.
 - **Verified**: 2026-08-20.
 
+### B5. OAuth callback MUST answer fast (< 2 s); provisioning must be fire-and-forget
+
+- **Symptom**: the merchant's store shows "应用尚未安装" / cannot pin / app missing from the list even though your side logged `store provisioned`; or a previously-failed install stays "not installed" forever.
+- **Root cause (doc gap)**: the platform expects the OAuth callback to answer quickly (~2 s). Running store-info fetch + all webhook subscriptions + script-tag injection synchronously took ~20 s, the platform timed out and never confirmed the install. The "already installed + valid token → /admin" shortcut is only valid AFTER a confirmed callback; for stores whose install never completed it traps them permanently.
+- **Fix**: the callback only exchanges the code, persists the store record, sets the session cookie and redirects; store info / webhooks / script tag run fire-and-forget afterwards. Gate the install shortcut on an `oauthCompletedAt` field (set when the callback really answered) — a store without it must run the authorization flow again on every install request.
+- **Verified**: 2026-08-22.
+
 ## C. Permission point mapping (权限点映射)
 
 ### C1. `read_content` is required for `GET /themes.json`, not `read_themes`
@@ -139,6 +152,45 @@ Boundary rules:
 - **Root cause (doc gap)**: unauthenticated Bearer requests get 403 with an `X-SHOPLINE-API-Request-Failure-Reauthorize` header; embedded requests bounce through `/exit-iframe` (a page that sets `top.location`); the SessionToken is a JWT signed HS256 with the **Base64(appSecret)** as the signing key — not the raw secret.
 - **Fix**: on 403 + reauthorize header, bounce through `/exit-iframe`; verify JWTs with `Base64(appSecret)`; keep `/exit-iframe` implemented and reachable.
 - **Verified**: 2026-08-20.
+
+### D3. Cross-store session cookie isolation (security)
+
+- **Symptom**: two SHOPLINE store admins embed the app under the SAME origin (one app domain) and share one cookie jar — store A's admin UI shows store B's subscription/plan after B authorized last.
+- **Root cause (doc gap)**: embedded apps serve many stores from one origin; a single shared session cookie is overwritten by whichever store authorized last. The leak can be MASKED when App Bridge never initializes (empty `shopline-app-key` meta / no `window.shopline.init` call), because the shared cookie silently covers for it — after cookie isolation the app may suddenly show 401s until two-phase auth is restored.
+- **Fix**: (a) scope the cookie per store (`orbit_session_<handle>`), (b) bind every request to its expected handle (query → Referer host) and accept only that store's cookie, (c) refuse a Bearer token naming a different handle, (d) resolve identity to the real store key (numeric `platformShopId`). Add a reauth-loop guard: a second 401 shows the authorize screen instead of bouncing forever.
+- **Verified**: 2026-08-22.
+
+## E. Billing & subscription webhooks (计费与订阅 webhook)
+
+### E1. Official appsubscription event ids are NOT what they look like
+
+- **Symptom**: a successful purchase never activates the plan — the admin keeps prompting for a trial; subscribing to what sounds right returns 422 "There are no available versions for subscription for the current event" and the subscription silently never fires.
+- **Root cause (doc gap)**: the real billing events are `appsubscription/paid` (payment finalized: 200 ok / 300 canceled / 400 failed), **`appsubscription/create`** (plan activated — carries `subPackage.featureKeyList` / `endAt` / `autoRenewStatus`), and **`appsubscription/expiration`** (plan expired). Guessed names like `activated`/`expired` do not exist and 422. Subscriptions are also version-scoped: the `api_version` used when creating webhook subscriptions must match the version configured in the Developer Center, otherwise delivery breaks or subscription fails silently.
+- **Fix**: confirm the exact event id from the docs page table (Event Identification column) instead of guessing; keep `config.apiVersion` and the Portal version in sync.
+- **Verified**: 2026-08-22.
+
+### E2. X-Shopline-Shop-Id is a NUMERIC store id, not the handle
+
+- **Symptom**: billing/webhook events are dropped (200 "no store") and the admin keeps showing the trial prompt after a successful subscription; no error anywhere.
+- **Root cause (doc gap)**: the `X-Shopline-Shop-Id` header carries the numeric store id (e.g. `1726388605926`) while store records are keyed by handle (`ultimate`). Looking up by shop id misses; a receiver that answers 200 without a log line silently swallows every event.
+- **Fix**: resolve in order — direct key → scan shopId/handle/`platformShopId` → derive the handle from `X-Shopline-Shop-Domain` (`ultimate.myshopline.com`). Persist the numeric id as `platformShopId` on first contact; all downstream writes use the real record key; never answer a miss without a log line.
+- **Verified**: 2026-08-22.
+
+### E3. featureKeyList is a snapshot taken at subscription time
+
+- **Symptom**: you configure feature keys in the Developer Center but the next `appsubscription/create` event still carries `["default"]`; entitlements fall back to the default plan.
+- **Root cause (doc gap)**: configuring feature keys does NOT retroactively update an existing subscription — the list is a snapshot taken when the subscription was created. Only a plan change / re-subscribe produces a new create event carrying the configured keys (`plan_pro`, `journeys_5`, ...). Unconfigured plans yield `["default"]` and `planKey` stays null.
+- **Fix**: treat `featureKeyList` as entitlement data delivered per subscription event; force a plan change / re-subscribe (or new subscription) after changing feature-key config; never assume current Developer Center config reflects existing subscriptions.
+- **Verified**: 2026-08-22.
+
+## F. App-store listing & billing config (上架与付费套餐配置)
+
+### F1. Paid plans need feature points AND a subscription group
+
+- **Symptom / context**: when the app's paid plans are billed through SHOPLINE's official subscription, merchants cannot subscribe correctly and the plans do not surface properly in the marketplace listing.
+- **Root cause (doc gap)**: after configuring multiple plan versions in the paid-mode config (付费模式), two extra steps are easy to miss: (1) each plan version must have its **feature points (功能点)** associated — otherwise entitlement data (`featureKeyList`) stays empty/`default`; (2) you must configure a **subscription group (订阅组)** — the subscription group is what gets displayed in the app marketplace (应用市场) listing.
+- **Fix**: in the Partner Portal paid-mode configuration: configure all plan versions → associate the relevant feature points with each version → create/select the subscription group so the plans are listed in the marketplace. Verify with a test purchase that the create event carries the configured `featureKeyList` (see E3).
+- **Verified**: 2026-08-22 (community/Portal config practice).
 
 ## References
 
