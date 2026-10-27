@@ -37,6 +37,11 @@ dsh web
 
 Skills-only: `cp -R skills/* ~/.dsh/skills/`
 
+**Compatibility**: works with dsh `0.1.x` (rc.6+) and `0.2.x` (rc.2+) runtimes — peer range
+`^0.1.0-rc.6 || ^0.2.0-rc.2`. The MCP bridge uses the runtime-provided
+`@deepseek-ai/dsh-mcp-client`. Updating an existing install (git spec / npm / local path) is
+covered in [docs/install.md](docs/install.md#updating-an-installed-plugin).
+
 ### Example
 
 > "Search the SHOPLINE Admin REST endpoints for products, then give me the full endpoint
@@ -91,6 +96,10 @@ dsh web
 ```
 
 只想用技能：`cp -R skills/* ~/.dsh/skills/`
+
+**兼容性**：支持 dsh `0.1.x`（rc.6+）与 `0.2.x`（rc.2+）运行时，peer 范围
+`^0.1.0-rc.6 || ^0.2.0-rc.2`；MCP 桥接使用运行时自带的 `@deepseek-ai/dsh-mcp-client`。
+已安装插件的更新方式（GitHub / npm / 本地路径）见 [docs/install.md](docs/install.md#updating-an-installed-plugin)。
 
 ### 示例
 

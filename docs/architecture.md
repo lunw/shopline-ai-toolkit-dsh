@@ -69,7 +69,7 @@ toolkit's shape:
    via `ctx.skills` at runtime (zero-config when the bundle is installed); the same
    `skills/` folder can be copied to `~/.dsh/skills` or `<project>/.dsh/skills` for
    skills-only setups — the same pattern as Shopify's `npx skills add`.
-5. **No new MCP protocol code.** DSH already ships `@deepseek-ai/dsh-mcp-client`; the
+5. **No new MCP protocol code.** DSH already ships `@deepseek-ai/dsh-mcp-client` (and every dsh runtime carries it); the patch row therefore resolves the **runtime's own copy** through dsh's two-anchor module resolution — the plugin ships no MCP-client dependency, so there is no version skew between the bridge and the runtime. Originally: DSH already ships `@deepseek-ai/dsh-mcp-client`; the
    toolkit only wires configuration, which keeps the plugin small, reviewable and aligned
    with the harness's own semantics (server-qualified tool names, reconnect, timeouts).
 

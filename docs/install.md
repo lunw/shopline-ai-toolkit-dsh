@@ -90,3 +90,62 @@ patch) to get `mcp__sline__*` tools (Admin schema introspection, Sline theme val
 | `mcp__shopline__*` tools missing | MCP server startup failed silently (default `failOnStartupError: false`). Run `npx -y @shoplineos/shopline-developer-mcp` once manually; check node >= 18. |
 | Skills not in catalog | Skills are cataloged per agent preset; restart the session, or use Option B with `~/.dsh/skills`. |
 | First tool call times out | The npx download can take > 60 s; raise `toolCallTimeoutMs` or pre-warm the package. |
+
+## Compatibility with dsh runtimes
+
+dsh checks a profile bundle's peerDependencies against the running dsh version
+(dsh-app-boot's own version). Peer names that are @deepseek-ai/dsh or start with
+@deepseek-ai/dsh- are validated; every other peer is ignored. An incompatible bundle is
+skipped at startup (stderr: dsh: skipping profile bundle ...) until either the plugin is
+updated or an exact-version exemption is granted.
+
+| Plugin version | Supported dsh runtimes | Notes |
+| --- | --- | --- |
+| 0.2.2+ | 0.1.x line (^0.1.0-rc.6) AND 0.2.x line (^0.2.0-rc.2) | peer range "^0.1.0-rc.6 || ^0.2.0-rc.2"; the MCP bridge uses the runtime-provided @deepseek-ai/dsh-mcp-client (no bundled copy, no version skew) |
+| 0.1.x - 0.2.1 | ^0.1.0-rc.6 only | flagged on dsh 0.2.0-rc.2: "Plugin shopline-ai-toolkit-dsh@<ver> is incompatible with dsh 0.2.0-rc.2: peerDependencies {@deepseek-ai/dsh-skill: ^0.1.0-rc.6}" |
+
+If a future runtime is flagged: update the plugin, or accept the risk for the exact
+package/runtime pair:
+
+    dsh plugin --profile web allow-version shopline-ai-toolkit-dsh@0.2.2 --dsh-version <exact runtime> --accept-risk
+    dsh plugin --profile web version-exemptions
+    dsh plugin --profile web revoke-version shopline-ai-toolkit-dsh@0.2.2 --dsh-version <exact runtime>
+
+The exemption is recorded in the profile's compatibility.json and applies only to that exact
+package version and exact runtime version.
+
+## Updating an installed plugin
+
+The profile records how the plugin was installed in
+~/.dsh/profiles/<profile>/package.json. Update according to the spec:
+
+Installed from GitHub (dependency looks like "github:lunw/shopline-ai-toolkit-dsh"):
+
+    # re-resolve the git spec to the latest main commit (and reinstall)
+    dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh
+    # or pin a released tag for reproducible installs, then install:
+    #   edit ~/.dsh/profiles/web/package.json:
+    #   "shopline-ai-toolkit-dsh": "github:lunw/shopline-ai-toolkit-dsh#v0.2.2"
+    dsh plugin --profile web install
+    dsh web
+
+Installed from npm (once published):
+
+    dsh plugin --profile web update shopline-ai-toolkit-dsh
+    # or: dsh plugin --profile web add shopline-ai-toolkit-dsh@latest
+
+Installed from a local path (file:...): re-run the add with the same path so pnpm re-links
+the package, then restart dsh.
+
+Verify the update:
+
+    # installed version (matches the repo's package.json version)
+    python3 -c "import json;print(json.load(open('/Users/lenny/.dsh/profiles/web/node_modules/shopline-ai-toolkit-dsh/package.json'))['version'])"
+    # composed config still contains the two rows
+    dsh --profile web --dump-config | grep -A 8 mcp-shopline
+    # startup must NOT print: skipping profile bundle "shopline-ai-toolkit-dsh"
+
+If the old version is still loaded after updating, remove the stale copy and reinstall:
+
+    rm -rf ~/.dsh/profiles/web/node_modules/shopline-ai-toolkit-dsh
+    dsh plugin --profile web install
