@@ -29,7 +29,7 @@ toolkit's shape:
 | --- | --- | --- |
 | Agent skills (`shopify-admin`, `shopify-use-shopify-cli`, ...) | `skills/` bundles (`shopline-admin-rest`, `shopline-graphql`, `shopline-oauth`, `shopline-webhook`, `shopline-sline`, `shopline-onboarding-dev`, `shopline-dev-mcp`) | `ctx.skills` registry — registered at runtime by `lib/index.js` as a bundled provider (rank 600); also installable to `~/.dsh/skills` |
 | Dev MCP server (`@shopify/dev-mcp`) | Official `@shoplineos/shopline-developer-mcp` (+ optional `@shopline/dev-mcp`) | DSH's native MCP client `@deepseek-ai/dsh-mcp-client` — patch row `mcp-shopline`; tools become `mcp__shopline__*` |
-| Plugins (Claude Code/Cursor/...) | A dsh bundle: `cordis.patch.yml` + `lib/index.js` + `package.json` (`dsh.bundle.patch`) | `dsh plugin --profile <name> add github:lunw/shopline-ai-toolkit-dsh#v0.2.3` |
+| Plugins (Claude Code/Cursor/...) | A dsh bundle: `cordis.patch.yml` + `lib/index.js` + `package.json` (`dsh.bundle.patch`) | `dsh plugin --profile <name> add shopline-ai-toolkit-dsh` (npm; GitHub fallback: `github:lunw/shopline-ai-toolkit-dsh#v0.2.4`) |
 
 ## Component diagram
 

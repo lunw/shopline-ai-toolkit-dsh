@@ -4,10 +4,9 @@
 `cordis.patch.yml` layer registers the official SHOPLINE Developer MCP bridge and whose
 `lib/index.js` registers the bundled SHOPLINE skills. You can install it three ways.
 
-> ⚠️ **The package is not published to the npm registry yet.**
-> `dsh plugin add shopline-ai-toolkit-dsh` fails with `ERR_PNPM_FETCH_404` because
-> `registry.npmjs.org/shopline-ai-toolkit-dsh` does not exist (yet). Install from GitHub
-> with the spec below. Once the package is published, the short form becomes available.
+> ✅ **Published on npm since v0.2.3**: `registry.npmjs.org/shopline-ai-toolkit-dsh`.
+> `dsh plugin add shopline-ai-toolkit-dsh` installs the latest release; the GitHub spec
+> (with a pinned tag) remains available as a fallback, e.g. for offline or audited installs.
 
 ## Option A — full bundle (recommended)
 
@@ -16,8 +15,7 @@ Prereqs: dsh installed, Node.js >= 18 (the MCP server needs it), and npm access 
 
 ```bash
 # 1. install the package into a profile (forwards to pnpm in the profile dir)
-#    use the GitHub spec and pin the release tag for reproducibility
-dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3
+dsh plugin --profile web add shopline-ai-toolkit-dsh
 
 # 2. declare the bundle in the profile manifest — edit ~/.dsh/profiles/web/package.json:
 #    "dsh": { "profile": { "bundles": [
@@ -28,9 +26,11 @@ dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3
 dsh web
 ```
 
-> The npm short form (`dsh plugin --profile web add shopline-ai-toolkit-dsh`) only works
-after the package is published to registry.npmjs.org. Until then pnpm answers
-`ERR_PNPM_FETCH_404: GET https://registry.npmjs.org/shopline-ai-toolkit-dsh: Not Found`.
+> From GitHub instead (pin a release tag):
+> `dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.4`
+>
+> Upgrading an older install that used the GitHub spec: replace the spec with the npm name
+> (or the new tag) as shown under [Updating an installed plugin](#updating-an-installed-plugin).
 
 After restart:
 - the agent's skill catalog contains the `shopline-*` skills;
@@ -94,7 +94,7 @@ patch) to get `mcp__sline__*` tools (Admin schema introspection, Sline theme val
 
 | Symptom | Fix |
 | --- | --- |
-| `dsh plugin add shopline-ai-toolkit-dsh` → `ERR_PNPM_FETCH_404` | The npm name is not published yet — use `dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3` |
+| `dsh plugin add shopline-ai-toolkit-dsh` → `ERR_PNPM_FETCH_404` | Only versions before 0.2.3 are unpublished; make sure you are online and the name is spelled exactly. Fallback: `dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.4` |
 | `mcp__shopline__*` tools missing | MCP server startup failed silently (default `failOnStartupError: false`). Run `npx -y @shoplineos/shopline-developer-mcp` once manually; check node >= 18. |
 | Skills not in catalog | Skills are cataloged per agent preset; restart the session, or use Option B with `~/.dsh/skills`. |
 | First tool call times out | The npx download can take > 60 s; raise `toolCallTimeoutMs` or pre-warm the package. |
@@ -115,9 +115,9 @@ updated or an exact-version exemption is granted.
 If a future runtime is flagged: update the plugin, or accept the risk for the exact
 package/runtime pair:
 
-    dsh plugin --profile web allow-version shopline-ai-toolkit-dsh@0.2.3 --dsh-version <exact runtime> --accept-risk
+    dsh plugin --profile web allow-version shopline-ai-toolkit-dsh@0.2.4 --dsh-version <exact runtime> --accept-risk
     dsh plugin --profile web version-exemptions
-    dsh plugin --profile web revoke-version shopline-ai-toolkit-dsh@0.2.3 --dsh-version <exact runtime>
+    dsh plugin --profile web revoke-version shopline-ai-toolkit-dsh@0.2.4 --dsh-version <exact runtime>
 
 The exemption is recorded in the profile's compatibility.json and applies only to that exact
 package version and exact runtime version.
@@ -134,10 +134,15 @@ Installed from GitHub (dependency looks like "github:lunw/shopline-ai-toolkit-ds
     # (or edit ~/.dsh/profiles/web/package.json to that tag, then: dsh plugin --profile web install)
     dsh web
 
-Installed from npm (once the package is published to registry.npmjs.org):
+Installed from npm (recommended):
 
     dsh plugin --profile web update shopline-ai-toolkit-dsh
     # or: dsh plugin --profile web add shopline-ai-toolkit-dsh@latest
+
+Installed from an older GitHub spec: switch to the npm name (or pin the new tag):
+
+    dsh plugin --profile web add shopline-ai-toolkit-dsh
+    # or: dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.4
 
 Installed from a local path (file:...): re-run the add with the same path so pnpm re-links
 the package, then restart dsh.
