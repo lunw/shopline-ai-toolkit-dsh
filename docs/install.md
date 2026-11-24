@@ -1,8 +1,13 @@
 # Installation
 
-`shopline-ai-toolkit-dsh` is a dsh plugin bundle: an npm package whose
+`shopline-ai-toolkit-dsh` is a dsh plugin bundle: an npm-format package whose
 `cordis.patch.yml` layer registers the official SHOPLINE Developer MCP bridge and whose
 `lib/index.js` registers the bundled SHOPLINE skills. You can install it three ways.
+
+> ⚠️ **The package is not published to the npm registry yet.**
+> `dsh plugin add shopline-ai-toolkit-dsh` fails with `ERR_PNPM_FETCH_404` because
+> `registry.npmjs.org/shopline-ai-toolkit-dsh` does not exist (yet). Install from GitHub
+> with the spec below. Once the package is published, the short form becomes available.
 
 ## Option A — full bundle (recommended)
 
@@ -11,7 +16,8 @@ Prereqs: dsh installed, Node.js >= 18 (the MCP server needs it), and npm access 
 
 ```bash
 # 1. install the package into a profile (forwards to pnpm in the profile dir)
-dsh plugin --profile web add shopline-ai-toolkit-dsh
+#    use the GitHub spec and pin the release tag for reproducibility
+dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3
 
 # 2. declare the bundle in the profile manifest — edit ~/.dsh/profiles/web/package.json:
 #    "dsh": { "profile": { "bundles": [
@@ -22,12 +28,9 @@ dsh plugin --profile web add shopline-ai-toolkit-dsh
 dsh web
 ```
 
-From a GitHub checkout instead of npm:
-
-```bash
-dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh
-# then add "shopline-ai-toolkit-dsh" to dsh.profile.bundles as above
-```
+> The npm short form (`dsh plugin --profile web add shopline-ai-toolkit-dsh`) only works
+after the package is published to registry.npmjs.org. Until then pnpm answers
+`ERR_PNPM_FETCH_404: GET https://registry.npmjs.org/shopline-ai-toolkit-dsh: Not Found`.
 
 After restart:
 - the agent's skill catalog contains the `shopline-*` skills;
@@ -35,12 +38,15 @@ After restart:
 
 ## Option B — skills only (no bundle)
 
-Copy the skill bundles into a DSH skill root — user-wide or per project:
+Clone the repository, then copy the skill bundles into a DSH skill root — user-wide or
+per project. This installs the skills **only** (no `mcp__shopline__*` tools).
 
 ```bash
-cp -R skills/* ~/.dsh/skills/          # user-wide (all profiles/projects)
+git clone https://github.com/lunw/shopline-ai-toolkit-dsh
+mkdir -p ~/.dsh/skills
+cp -R shopline-ai-toolkit-dsh/skills/* ~/.dsh/skills/   # user-wide (all profiles/projects)
 # or
-cp -R skills/* <project>/.dsh/skills/  # per project
+cp -R shopline-ai-toolkit-dsh/skills/* <project>/.dsh/skills/  # per project
 ```
 
 DSH discovers skills from `~/.dsh/skills`, `~/.agents/skills` and
@@ -63,8 +69,9 @@ Add the snippet from `mcp/mcp.shopline.json` (or below) to the profile's
     toolCallTimeoutMs: 120000
 ```
 
-Requires `@deepseek-ai/dsh-mcp-client` resolvable from the profile (it is a dependency
-of this package; `pnpm add @deepseek-ai/dsh-mcp-client` in the profile also works).
+`@deepseek-ai/dsh-mcp-client` does not need installing: every dsh installation ships it,
+and dsh's two-anchor module resolution resolves the patch row from the installation itself
+(since v0.2.2 this package no longer carries its own copy).
 
 ## Verify
 
@@ -87,6 +94,7 @@ patch) to get `mcp__sline__*` tools (Admin schema introspection, Sline theme val
 
 | Symptom | Fix |
 | --- | --- |
+| `dsh plugin add shopline-ai-toolkit-dsh` → `ERR_PNPM_FETCH_404` | The npm name is not published yet — use `dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3` |
 | `mcp__shopline__*` tools missing | MCP server startup failed silently (default `failOnStartupError: false`). Run `npx -y @shoplineos/shopline-developer-mcp` once manually; check node >= 18. |
 | Skills not in catalog | Skills are cataloged per agent preset; restart the session, or use Option B with `~/.dsh/skills`. |
 | First tool call times out | The npx download can take > 60 s; raise `toolCallTimeoutMs` or pre-warm the package. |
@@ -107,9 +115,9 @@ updated or an exact-version exemption is granted.
 If a future runtime is flagged: update the plugin, or accept the risk for the exact
 package/runtime pair:
 
-    dsh plugin --profile web allow-version shopline-ai-toolkit-dsh@0.2.2 --dsh-version <exact runtime> --accept-risk
+    dsh plugin --profile web allow-version shopline-ai-toolkit-dsh@0.2.3 --dsh-version <exact runtime> --accept-risk
     dsh plugin --profile web version-exemptions
-    dsh plugin --profile web revoke-version shopline-ai-toolkit-dsh@0.2.2 --dsh-version <exact runtime>
+    dsh plugin --profile web revoke-version shopline-ai-toolkit-dsh@0.2.3 --dsh-version <exact runtime>
 
 The exemption is recorded in the profile's compatibility.json and applies only to that exact
 package version and exact runtime version.
@@ -119,17 +127,14 @@ package version and exact runtime version.
 The profile records how the plugin was installed in
 ~/.dsh/profiles/<profile>/package.json. Update according to the spec:
 
-Installed from GitHub (dependency looks like "github:lunw/shopline-ai-toolkit-dsh"):
+Installed from GitHub (dependency looks like "github:lunw/shopline-ai-toolkit-dsh#v0.2.2"):
 
-    # re-resolve the git spec to the latest main commit (and reinstall)
-    dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh
-    # or pin a released tag for reproducible installs, then install:
-    #   edit ~/.dsh/profiles/web/package.json:
-    #   "shopline-ai-toolkit-dsh": "github:lunw/shopline-ai-toolkit-dsh#v0.2.2"
-    dsh plugin --profile web install
+    # pin the new release tag and reinstall
+    dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3
+    # (or edit ~/.dsh/profiles/web/package.json to that tag, then: dsh plugin --profile web install)
     dsh web
 
-Installed from npm (once published):
+Installed from npm (once the package is published to registry.npmjs.org):
 
     dsh plugin --profile web update shopline-ai-toolkit-dsh
     # or: dsh plugin --profile web add shopline-ai-toolkit-dsh@latest

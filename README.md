@@ -23,19 +23,26 @@ architecture to SHOPLINE developers working inside **DeepSeek Harness (dsh)**:
 | 🧠 **Agent skills** (`skills/`) | 8 SKILL.md bundles: `shopline-onboarding-dev`, `shopline-admin-rest`, `shopline-graphql`, `shopline-oauth`, `shopline-webhook`, `shopline-sline`, `shopline-dev-mcp` (documented behavior) + `shopline-app-dev-doc-gaps` (app-dev doc-gap supplement, withdrawable once official docs cover it) — endpoint URLs, signing rules, error codes, retry policies, all grounded in [developer.shopline.com](https://developer.shopline.com/) docs and [community experience](https://community.shoplineapp.cn/) |
 | 🔌 **Dev MCP bridge** | The **official** [SHOPLINE Developer MCP](https://developer.shopline.com/docs/apps/development-tool/shopline-developer-mcp) (`@shoplineos/shopline-developer-mcp`, local stdio, no auth) is wired through dsh's native MCP client — tools appear as `mcp__shopline__search_shopline_docs`, `mcp__shopline__get_admin_rest_endpoint_detail`, `mcp__shopline__get_graphql_schema`, `mcp__shopline__validate_graphql_codes`, … |
 | 🎛️ **Optional community MCP** | [sline.dev](https://sline.dev/mcp) server (`@shopline/dev-mcp`) adds `mcp__sline__introspect_admin_schema`, `mcp__sline__validate_theme`, … (commented out by default) |
-| 📦 **dsh bundle** | `cordis.patch.yml` + `lib/index.js`, installable with `dsh plugin --profile <name> add shopline-ai-toolkit-dsh` |
+| 📦 **dsh bundle** | `cordis.patch.yml` + `lib/index.js`, installable from GitHub with `dsh plugin --profile <name> add github:lunw/shopline-ai-toolkit-dsh#v0.2.3` (npm publishing in progress) |
 
 ### Install
 
 See [docs/install.md](docs/install.md). Quick start (full bundle):
 
 ```bash
-dsh plugin --profile web add shopline-ai-toolkit-dsh
+# not on npm yet — install from GitHub, pinned to the release tag
+dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3
 # add "shopline-ai-toolkit-dsh" to dsh.profile.bundles in ~/.dsh/profiles/web/package.json
 dsh web
 ```
 
-Skills-only: `cp -R skills/* ~/.dsh/skills/`
+Skills-only (no MCP tools):
+
+```bash
+git clone https://github.com/lunw/shopline-ai-toolkit-dsh
+mkdir -p ~/.dsh/skills
+cp -R shopline-ai-toolkit-dsh/skills/* ~/.dsh/skills/
+```
 
 **Compatibility**: works with dsh `0.1.x` (rc.6+) and `0.2.x` (rc.2+) runtimes — peer range
 `^0.1.0-rc.6 || ^0.2.0-rc.2`. The MCP bridge uses the runtime-provided
@@ -83,19 +90,26 @@ MIT. Not affiliated with SHOPLINE; official docs and npm packages remain the sou
 | 🧠 **Agent 技能**（`skills/`） | 8 个 SKILL.md 技能：`shopline-onboarding-dev`（入门）、`shopline-admin-rest`（REST API）、`shopline-graphql`（GraphQL）、`shopline-oauth`（授权与签名）、`shopline-webhook`、`shopline-sline`（模板引擎）、`shopline-dev-mcp`（MCP 工具用法，均为官方已文档化行为）+ `shopline-app-dev-doc-gaps`（应用开发文档盲区补充，官方文档补齐后逐条撤回）。端点、签名规则、错误码、重试策略均来自 [developer.shopline.com](https://developer.shopline.com/) 官方文档与 [community.shoplineapp.cn](https://community.shoplineapp.cn/) 社区实践 |
 | 🔌 **Dev MCP 桥接** | 通过 dsh 原生 MCP 客户端接入**官方** [SHOPLINE 开发者 MCP](https://developer.shopline.com/docs/apps/development-tool/shopline-developer-mcp)（`@shoplineos/shopline-developer-mcp`，本地 stdio、免鉴权）。工具以 `mcp__shopline__search_shopline_docs`、`mcp__shopline__get_admin_rest_endpoint_detail`、`mcp__shopline__get_graphql_schema`、`mcp__shopline__validate_graphql_codes` 等形式直接可用 |
 | 🎛️ **可选社区 MCP** | [sline.dev](https://sline.dev/mcp) 服务器（`@shopline/dev-mcp`）提供 `mcp__sline__introspect_admin_schema`（Admin GraphQL Schema 内省）、`mcp__sline__validate_theme`（Sline 模板校验）等，默认注释、按需开启 |
-| 📦 **dsh 插件包** | `cordis.patch.yml` + `lib/index.js`，一条命令安装：`dsh plugin --profile <name> add shopline-ai-toolkit-dsh` |
+| 📦 **dsh 插件包** | `cordis.patch.yml` + `lib/index.js`，从 GitHub 安装：`dsh plugin --profile <name> add github:lunw/shopline-ai-toolkit-dsh#v0.2.3`（npm 发布进行中） |
 
 ### 安装
 
 详见 [docs/install.md](docs/install.md)。快速开始（完整插件）：
 
 ```bash
-dsh plugin --profile web add shopline-ai-toolkit-dsh
+# 尚未发布到 npm——请从 GitHub 安装，并固定到发布 tag
+dsh plugin --profile web add github:lunw/shopline-ai-toolkit-dsh#v0.2.3
 # 在 ~/.dsh/profiles/web/package.json 的 dsh.profile.bundles 中加入 "shopline-ai-toolkit-dsh"
 dsh web
 ```
 
-只想用技能：`cp -R skills/* ~/.dsh/skills/`
+只想用技能（不含 MCP 工具）：
+
+```bash
+git clone https://github.com/lunw/shopline-ai-toolkit-dsh
+mkdir -p ~/.dsh/skills
+cp -R shopline-ai-toolkit-dsh/skills/* ~/.dsh/skills/
+```
 
 **兼容性**：支持 dsh `0.1.x`（rc.6+）与 `0.2.x`（rc.2+）运行时，peer 范围
 `^0.1.0-rc.6 || ^0.2.0-rc.2`；MCP 桥接使用运行时自带的 `@deepseek-ai/dsh-mcp-client`。
